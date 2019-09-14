@@ -1,0 +1,31 @@
+{
+  "name": "react-microfe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "dev": "concurrently \"cd apps/test-main && npm start\" \"cd apps/test-remote && npm start arg\"",
+    "dev:setup": "cd apps/test-main && npm i && npm link ../../ && cd ../test-remote && npm i && npm link ../../ && npm run build",
+    "dev:link": "cd apps/test-main && npm link ../../ && cd ../test-remote && npm link ../../",
+    "build": "npm run clean && tsc",
+    "build:remote": "cd apps/test-remote && export NODE_ENV=development && npx webpack --config microfe.config.js && cp -f dist/myfrontend.js public/myfrontend.js",
+    "clean": "rm -rf lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "lib"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/webpack": "^4.39.1",
+    "concurrently": "^4.1.2",
+    "prettier": "^1.18.2",
+    "prettier-tslint": "^0.4.2",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.3",
+    "webpack": "4.39.1",
+    "webpack-cli": "^3.3.8",
+    "wrapper-webpack-plugin": "^2.1.0"
+  }
+}

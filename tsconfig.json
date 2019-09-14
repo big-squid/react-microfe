@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "outDir": "lib",
+    "declaration": true,
+    "esModuleInterop": true,
+    "target": "es5",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "lib": ["esnext", "dom"],
+    "jsx": "react"
+  },
+  "exclude": ["node_modules", "**/*.spec.ts", "apps"]
+}
