@@ -9,19 +9,19 @@ An un-opinionated implementation of microfrontends in React.
 
 ## Why Microfrontends?
 
-Microfrontends do for the client what Microservices have done for the backend. They allow you to build, maintain, and deploy a logical portion of your application separate from other pieces. This allows teams to move quickly and independently and prevent you application from becoming a gigantic bloated monolith that is hard to work on. If you've landed here, it's either because you have heard the buzz word, or you're actually experiencing the pain in your current monolith.
+Microfrontends do for the client what Microservices have done for the backend. They allow you to build, maintain, and deploy a logical portion of your application separate from other pieces. This allows teams to move quickly and independently and prevent you application from becoming a gigantic bloated monolith that is hard to work on. If you've landed here, it's either because you have heard the buzz word, or you're actually experiencing the pain with your own monolithic frontend.
 
 ![Microfrontends](https://github.com/big-squid/react-microfe/raw/master/microfrontends.png "Microfrontends")
 
 ## Other solutions
-- Single SPA: This solution is more of a framework that provides ways to run multiple front end languages and uses System.js for dynamic runtime importing. If you want to make a franken app of React, Vue, and Angular, this project might be for you.
+- Single SPA: This solution is more of a framework that provides ways to run multiple front end languages and uses System.js for dynamic runtime importing. If you want to make a franken app of React, Vue, and Angular, this project might be for you. https://github.com/CanopyTax/single-spa
 - Web components: This involves exporting your microfrontend as a standalone web component. This solution is viable for shipping microfrontends, but browser support is still limited and requires heavy polyfilling. All of the standard limitations of web components apply. 
 - Installable React components: This involves publishing your microfrontend as an installable React component. The build and maintenance portion of doing this would be nearly identical to using `react-microfe`, but the downside is that deployments will require going back to the main app shim, revving a version, installing the package, doing a build, and re-deploying the main app.
-- iFrames: This involves the main app shim loading up content from different domains using iFrames. These win for being the easiest to setup and maintain, but they're terrible for browser performance, have varying security rules across browsers, and have an automatic "ick" factor associated with most devs.
+- iFrames: This involves the main app shim loading up content from different domains using iFrames. These win for being the easiest to setup and maintain, but they're terrible for  performance, have varying security rules across browsers, and have an automatic "ick" factor associated with most devs.
 
 ## How react-microfe works
 
-`react-microfe` wraps a component at build time in a way that allows it to be imported dynamically into a main React app. You can think of it like dynamic imports except it works across domains. Additionally it exposes a way to declare shared libraries and provide runtime configuration for your frontend. It makes very few assumptions about the structure of your code or how you will deploy your application. It also doesn't require any advanced polyfills or specific browser support. It works out of the box with React.Lazy and React.Suspense, so usage should be familiar to anyone that has used those APIs. A quick example:
+`react-microfe` wraps a component at build time in a way that allows it to be imported dynamically into your main React app shim. You can think of it like webpack's dynamic import syntax except it works across domains instead of in your local codebase. Additionally it exposes a way to declare shared libraries and provide runtime configuration for your microfrontend. It makes very few assumptions about the structure of your code or how you will deploy your application. It also doesn't require any advanced polyfills or specific browser support. It works out of the box with `React.Lazy` and `React.Suspense`, so usage should be familiar to anyone that has used those APIs. A quick example:
 
 ```jsx
 import React from 'react'
@@ -44,17 +44,18 @@ function App() {
 
 ### Installation and Setup
 Intall using NPM or Yarn
+
 `npm i react-microfe` or `yarn add react-microfe`
 
 This setup guide will walk you through the following:
 - Building your frontend
 - Packaging and deploying your frontend
-- Importing your microfrontend into your main / shim app
+- Importing your microfrontend into your main shim app
 - Handling runtime configuration
 - Advanced Topics
 
 ### Building Frontends
-`react-microfe` works well with `create-react-app` out of the box, but you are free to build with any tools you wish but Webpack is the recommended build system to make this "just work". There is just a minor congnitave and structural change you may have to make to your app.
+`react-microfe` works well with `create-react-app` out of the box. You are free to build with any tools you wish but Webpack is the recommended build system to make this "just work". There is just a minor congnitave and structural change you may have to make when developing your microfrontends codebase.
 
 A typical Hello World React example usually has you place things like Providers, Routers, and other setup components at the root index.js of your app.
 
@@ -87,7 +88,7 @@ export default function App() {
 }
 ```
 
-The only thing that needs to change in the above example is that ReduxProviders, Routers, and any other global providers should be available as part of your app.js files default export. Also keep in mind what styles you do and don't want to come along with your microfrontend.
+The above wont work for our microfrontend because we want the providers to be part of the exported App component. The only thing that needs to change in the above example is that ReduxProviders, Routers, and any other global providers should be available as part of your app.js files default export. Also keep in mind what styles you do and don't want to come along with your microfrontend.
 
 ```jsx
 // A modified example for react-microfe. DO THIS!
@@ -113,6 +114,7 @@ function App() {
   return <div>Hello World</div>
 }
 
+// Our default export now contains our app, and our providers
 export default function() {
   return (
     <Provider store={store}>
@@ -124,7 +126,7 @@ export default function() {
 }
 ```
 
-Thats really the only change you'll have to make to your development setup! Building a microfrontend still requires some additional thought in regards to dependencies, styling, and configuration. It will be injected along side of another app that already has things like styles, polyfills, global variables, local and session storage items, workers, and many other things that we're used to only thinking about in a single context.
+Thats really the only change you'll have to make to your development setup! Building a microfrontend still requires some additional thought in regards to dependencies, styling, and configuration. It will be injected along side of another app that already has things like styles, polyfills, global variables, local and session storage items, workers, and many other things that you're probably used to only thinking about in a single context.
 
 ## Packaging and Deployment
 
@@ -150,13 +152,13 @@ If you used `create-react-app` for your frontend, packing should be quick and ea
   ```
 - You should now have a file in the `dist` or `build` directory called `myfrontend`, or whatever you named yours.
 
-Your `myfrontend.js` file should be completely self contained and have everything needed to run your microfrontend. You can now host this file on the server or CDN of your choice.
+Your `myfrontend.js` file should be completely self contained and have everything needed to run your microfrontend. You can now host this file on the server or CDN of your choice. You can see the `apps/test-remote` directory for a working example using `create-react-app`. The above example should work with a custom webpack config as well, just import your webpack config instead of CRA's. See "Advanced Topics" for strategies to build your app with something other than webpack.
 
 ## Importing your Microfrontend
 
 Now that your microfrontend is deployed somewhere, we can import it into the main application. If you have an existing project, the "main" application is your monolith. If you're starting from scratch, the main application should be a shell that might have some global navigation and routing in it.
 
-Before we continue though, we need to expose React and ReactDOM as a shared dependency so that our microfrontend will have access to it when it loads. This is done quickly using the `declareExternals` function.
+Before we continue though, we need to expose React and ReactDOM as a shared dependency so that our microfrontend will have access to it when it loads. React complains loudly if it finds multiple copies of itself in the DOM, so this setup is required. This is done easily using the `declareExternals` function.
 
 ```jsx
 // in the index.js file of your main / app shim
@@ -174,10 +176,9 @@ declareExternals({
 ReactDOM.render(<App />, document.getElementById('root'));
 ```
 
-The same function is used to declare other shared dependencies if you have them which is addressed in the advanced section below. At a minimum, React and ReactDOM are always required.
+The same function is used to declare other shared dependencies if you have them which is addressed in the "Advanced Topics" section below. At a minimum, React and ReactDOM are always required.
 
-
-From here, simply use the `React.lazy` and `React.Suspense` apis with the `importMicrofrontend` function. You should see your remote microfrontend load and mount like any other React component.
+No we can simply use the `React.lazy` and `React.Suspense` apis with the `importMicrofrontend` function. You should see your remote microfrontend load and mount like any other React component.
 
 ```jsx
 import React from 'react';
@@ -198,9 +199,9 @@ function App() {
 
 ## Configuration
 
-There are many ways to handle configuration when deploying, often referred as environment variables. Things like your api url, browser based api keys, or feature flags are all examples of configuration. Most of all, these configuration variables generally vary between environments, i.e. https://dev.myapi.com vs  https://prod.myapi.com.
+There are many ways to handle configuration when deploying, often referred as environment variables. Things like your api url, browser based api keys, or feature flags are all examples of configuration. These configuration variables generally vary between environments, i.e. an api url for your dev environment vs production: https://dev.myapi.com vs  https://prod.myapi.com.
 
-If you're using `create-react-app` or `webpack` you might be familiar with using a .env file and accessing variables in your code using `process.env`. When you run a build of your application, webpack actually replaces anywhere that says `process.env` with a hardcoded javascript object. This makes makes your built file static and not very configurable. While you are free to roll your own configuration management, `react-microfe` includes a couple of bare essentials so that it can just work out of the box.
+If you're using `create-react-app` or `webpack` you might be familiar with using a .env file and accessing variables in your code using `process.env`. When you run a build of your application, webpack actually replaces anywhere that says `process.env` with a hardcoded javascript object. This makes makes your built file static and not very configurable. If you've ever deployed a frontend application, you're likely already aware of this. While you are free to roll your own configuration management, `react-microfe` includes some bare essentials so that it can just work out of the box.
 
 ### Specifying Configuration
 
@@ -305,6 +306,15 @@ function MyComponent() {
 
 ## Advanced Topics
 
+### CSS and Styling
+
+Since you're injecting multiple apps into your main app shim, there is the possibility of having conflicting styles. Some suggestions:
+
+- Use CSS modules. This is your best bet at making sure you'll never have a conflict.
+- Alternatively, use something like BEM and give yourself a strong unique namespace
+- Leverage CSS variables specified on the :root of your main app shim to set shared dependencies like colors and padding.
+- NEVER include styles on generic elements from your microfrontend. Leave html, body and the rest alone. If you have to do any sort of normalization for development, make sure it's included from your index.js file that bootstraps your microfrontend, not in the microfrontend itself.
+
 ### Alternative Configuration Methods
 
 You're not required to use the environment helpers or handling that come bundled with `react-microfe`. If your configuration variables are known ahead of time, one option is to make a separate build per environment (dev, stage, prod). Another option is to pass all configuration options directly to the component as a prop and avoid process.env entirely.
@@ -367,6 +377,43 @@ const myFrontendVersion = process.env.MY_FRONTEND_VERSION;
 const MyRemoteFrontend = React.lazy(() =>
   importMicrofrontend(`https://my.example.com/myfrontend.js?hash=${hash}`);
 );
+```
+
+Another alternative is to host an import map somewhere that will be read by your main app at runtime. This is similar to the import map specified for the SystemJS spec. This setup is ideal if you're dealing with multiple microfrontends and want to control the source of truth for your app from a single location. A good way to handle this is to add a blocking script tag to the top of your html that pulls in your import map. That way it will be available when your code attempts to import your microfrontends. `react-microfe` doesn't handle this for you, but implementing it is trivial.
+
+```js
+// An example import map to be returned from your own backend.
+// assuming you have microfrontends for a usersProfile and another for homepage.
+window.myImportMap = {
+  userProfile: 'https://my.example.com/userprofile.js?hash=v1',
+  homepage: 'https://my.example.com/homepage.js?hash=v1'
+}
+```
+
+```jsx
+// in your main app shim
+import React from 'react';
+import { importMicrofrontend } from 'react-microfe';
+
+const MyUserProfile = React.lazy(() =>
+  importMicrofrontend(window.myImportMap.userProfile);
+);
+
+const MyHomePage = React.lazy(() =>
+  importMicrofrontend(window.myImportMap.homepage);
+);
+
+function App() {
+  return <div>
+    <React.Suspense fallback="loading">
+      <MyUserProfile />
+    </React.Suspense>
+    <React.Suspense fallback="loading">
+      <MyHomePage />
+    </React.Suspense>
+  </div>
+}
+```
 
 
 
