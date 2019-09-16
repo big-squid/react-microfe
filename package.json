@@ -15,7 +15,7 @@
     "test:coverage": "jest --coverage",
     "preversion": "npm test",
     "version": "npm run build",
-    "release:patch": "npm version && npm publish",
+    "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish"
   },
