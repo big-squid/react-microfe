@@ -49,7 +49,7 @@ function App() {
 ## Getting Started
 
 ### Installation and Setup
-Intall using NPM or Yarn
+Install using NPM or Yarn
 
 `npm i react-microfe` or `yarn add react-microfe`
 
