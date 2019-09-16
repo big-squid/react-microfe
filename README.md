@@ -65,8 +65,9 @@ This setup guide will walk you through the following:
 
 A typical Hello World React example usually has you place things like Providers, Routers, and other setup components at the root index.js of your app.
 
+A typical CRA example. **DON'T** do this when using react-microfe
+
 ```jsx
-// A typical CRA example. DON'T do this for react-microfe
 // src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -96,8 +97,9 @@ export default function App() {
 
 The above wont work for our microfrontend because we want the providers to be part of the exported App component. The only thing that needs to change in the above example is that ReduxProviders, Routers, and any other global providers should be available as part of your app.js files default export. Also keep in mind what styles you do and don't want to come along with your microfrontend.
 
+A modified example for react-microfe. **DO THIS!**
 ```jsx
-// A modified example for react-microfe. DO THIS!
+
 // src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -296,7 +298,7 @@ function MyComponent() {
 }
 ```
 
-To read environment variables inside of your code, use the `env` helper. This will first check the configuration specified by `importMicrofrontend`, followed by anything that was baked into `process.env` at build time. If no environment variable is found, this will fail loudly to help you catch configuration errors quickly in production. If you don't want it to fail loudly, or there is sensible default, you can pass a default value as a second parameter.
+The env helper will first check the configuration specified by `importMicrofrontend`, followed by anything that was baked into `process.env` at build time. If no environment variable is found, this will fail loudly to help you catch configuration errors quickly in production. If you don't want it to fail loudly, or there is sensible default, you can pass a default value as a second parameter.
 
 ```jsx
 // In a microfrontend
