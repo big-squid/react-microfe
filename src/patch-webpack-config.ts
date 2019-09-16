@@ -11,16 +11,23 @@ export const patchWebpackConfig = ({
   name: string;
   config: any;
   entry?: Configuration['entry'];
-  externals: Configuration['externals'];
+  externals?: Configuration['externals'];
 }) => {
+  if (!config) {
+    throw Error('Config missing. Please pass an existing webpack config.');
+  }
+
   if (!name) {
     throw Error(
-      'The name parameter is required. Please specify a name for your Micro Frontend. Names should only contain characters that are filesystem safe.'
+      'The name parameter is required. Please specify a name for your Micro Frontend. Names should be javascript variable safe.'
     );
   }
 
   config.entry = entry ? entry : config.entry;
   config.entry = Array.isArray(config.entry) ? config.entry : [config.entry];
+
+  config.optimization = config.optimization || {};
+  config.optimization.splitChunks = config.optimization.splitChunks || {};
 
   // This tricks Webpack into making a single file
   // basically telling it unless the file is over 1 GB, don't make a chunk for it.
@@ -28,6 +35,7 @@ export const patchWebpackConfig = ({
 
   // kil the runtime chunk
   config.optimization.runtimeChunk = false;
+  config.output = config.output || {};
 
   config.output.library = `reactMicrofeInternalModule`;
   config.output.libraryTarget = 'var';
@@ -52,8 +60,8 @@ export const patchWebpackConfig = ({
 
   // Add React and ReactDOM
   config.externals.push({
-    react: 'reactMicrofe.React',
-    'react-dom': 'reactMicrofe.ReactDOM'
+    react: 'reactMicrofeExternals.React',
+    'react-dom': 'reactMicrofeExternals.ReactDOM'
   });
 
   config.plugins = config.plugins || [];

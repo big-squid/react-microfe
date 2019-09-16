@@ -66,7 +66,7 @@ var reactMicrofeInternalModule =
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "bbb800f4e4f802a1a016";
+/******/ 	var hotCurrentHash = "c0f7ef61a6685ec2b75d";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -814,8 +814,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.declareExternals = function (externalDeclarations) {
-  window.reactMicrofe = window.reactMicrofe || {};
-  var ext = window.reactMicrofe;
+  var win = window;
+  win.reactMicrofeExternals = win.reactMicrofeExternals || {};
+  var ext = win.reactMicrofeExternals;
   Object.keys(externalDeclarations).forEach(function (key) {
     ext[key] = externalDeclarations[key];
   });
@@ -846,16 +847,47 @@ var safeParseJSON = function (val) {
     return val;
   }
 };
+/**
+ * Get a variable in scope called `reactMicrofeEnv`
+ * Wrapped in a try / catch to prevent this from exploding
+ * If the variable is undefined
+ */
 
-var _env = Object({"NODE_ENV":"development","PUBLIC_URL":""});
+
+var getMicrofeEnv = function () {
+  try {
+    // eslint-disable-next-line
+    // @ts-ignore
+    return reactMicrofeEnv || {};
+  } catch (err) {
+    return {};
+  }
+};
+/**
+ * Gets process.env safely
+ * Wrapped in a try / catch to prevent this from exploding
+ * If the variable is undefined
+ */
+
+
+var getProcessEnv = function () {
+  try {
+    // eslint-disable-next-line
+    // @ts-ignore
+    return Object({"NODE_ENV":"development","PUBLIC_URL":""});
+  } catch (err) {
+    return {};
+  }
+};
 
 exports.env = function (name, defaultValue) {
-  // @ts-ignore
-  if (reactMicrofeEnv && name in reactMicrofeEnv) {
-    // @ts-ignore
-    return safeParseJSON(reactMicrofeEnv[name]);
-  } else if (name in _env) {
-    return safeParseJSON(_env[name]);
+  var mEnv = getMicrofeEnv();
+  var pEnv = getProcessEnv();
+
+  if (name in mEnv) {
+    return safeParseJSON(mEnv[name]);
+  } else if (name in pEnv) {
+    return safeParseJSON(pEnv[name]);
   } else if (defaultValue !== undefined) {
     return defaultValue;
   } else {
@@ -867,10 +899,10 @@ exports.default = exports.env;
 
 /***/ }),
 
-/***/ "../../lib/import-micro-frontend.js":
-/*!***************************************************************************************!*\
-  !*** /Users/jamesmfriedman/Sites/bigsquid/react-microfe/lib/import-micro-frontend.js ***!
-  \***************************************************************************************/
+/***/ "../../lib/import-microfrontend.js":
+/*!**************************************************************************************!*\
+  !*** /Users/jamesmfriedman/Sites/bigsquid/react-microfe/lib/import-microfrontend.js ***!
+  \**************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -903,7 +935,7 @@ var hash = function (s) {
 };
 
 var getDomId = function (id) {
-  return "script-" + id;
+  return "react-microfe-" + id;
 };
 
 var getIdFromUrl = function (url) {
@@ -961,7 +993,7 @@ var loadEnvironments = function (_a) {
   });
 };
 
-exports.importMicroFrontend = function (args) {
+exports.importMicrofrontend = function (args) {
   var _a = typeof args === 'string' ? {
     url: args
   } : args,
@@ -969,7 +1001,7 @@ exports.importMicroFrontend = function (args) {
       _b = _a.remoteEnv,
       remoteEnv = _b === void 0 ? undefined : _b,
       _c = _a.env,
-      env = _c === void 0 ? {} : _c,
+      env = _c === void 0 ? undefined : _c,
       _d = _a.global,
       global = _d === void 0 ? 'reactMicrofeLoadedModule' : _d;
 
@@ -987,7 +1019,7 @@ exports.importMicroFrontend = function (args) {
   });
 };
 
-exports.default = exports.importMicroFrontend;
+exports.default = exports.importMicrofrontend;
 
 /***/ }),
 
@@ -1013,9 +1045,9 @@ var declare_externals_1 = __webpack_require__(/*! ./declare-externals */ "../../
 
 exports.declareExternals = declare_externals_1.declareExternals;
 
-var import_micro_frontend_1 = __webpack_require__(/*! ./import-micro-frontend */ "../../lib/import-micro-frontend.js");
+var import_microfrontend_1 = __webpack_require__(/*! ./import-microfrontend */ "../../lib/import-microfrontend.js");
 
-exports.importMicroFrontend = import_micro_frontend_1.importMicroFrontend;
+exports.importMicrofrontend = import_microfrontend_1.importMicrofrontend;
 
 var env_1 = __webpack_require__(/*! ./env */ "../../lib/env.js");
 
@@ -1053,17 +1085,24 @@ exports.patchWebpackConfig = function (_a) {
       entry = _a.entry,
       externals = _a.externals;
 
+  if (!config) {
+    throw Error('Config missing. Please pass an existing webpack config.');
+  }
+
   if (!name) {
-    throw Error('The name parameter is required. Please specify a name for your Micro Frontend. Names should only contain characters that are filesystem safe.');
+    throw Error('The name parameter is required. Please specify a name for your Micro Frontend. Names should be javascript variable safe.');
   }
 
   config.entry = entry ? entry : config.entry;
-  config.entry = Array.isArray(config.entry) ? config.entry : [config.entry]; // This tricks Webpack into making a single file
+  config.entry = Array.isArray(config.entry) ? config.entry : [config.entry];
+  config.optimization = config.optimization || {};
+  config.optimization.splitChunks = config.optimization.splitChunks || {}; // This tricks Webpack into making a single file
   // basically telling it unless the file is over 1 GB, don't make a chunk for it.
 
   config.optimization.splitChunks.minSize = 1000000000; // kil the runtime chunk
 
   config.optimization.runtimeChunk = false;
+  config.output = config.output || {};
   config.output.library = "reactMicrofeInternalModule";
   config.output.libraryTarget = 'var';
   config.output.auxiliaryComment = 'Hello';
@@ -1087,8 +1126,8 @@ exports.patchWebpackConfig = function (_a) {
 
 
   config.externals.push({
-    react: 'reactMicrofe.React',
-    'react-dom': 'reactMicrofe.ReactDOM'
+    react: 'reactMicrofeExternals.React',
+    'react-dom': 'reactMicrofeExternals.ReactDOM'
   });
   config.plugins = config.plugins || [];
   config.plugins.push(new wrapper_webpack_plugin_1.default({
@@ -14661,10 +14700,10 @@ utils.intFromLE = intFromLE;
 /*!*********************************************************************************************!*\
   !*** /Users/jamesmfriedman/Sites/bigsquid/react-microfe/node_modules/elliptic/package.json ***!
   \*********************************************************************************************/
-/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, bugs, bundleDependencies, dependencies, deprecated, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
+/*! exports provided: _args, _development, _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _spec, _where, author, bugs, dependencies, description, devDependencies, files, homepage, keywords, license, main, name, repository, scripts, version, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"_from\":\"elliptic@^6.0.0\",\"_id\":\"elliptic@6.5.1\",\"_inBundle\":false,\"_integrity\":\"sha512-xvJINNLbTeWQjrl6X+7eQCrIy/YPv5XCpKW6kB5mKvtnGILoLDcySuwomfdzt0BMdLNVnuRNTuzKNHj0bva1Cg==\",\"_location\":\"/elliptic\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"range\",\"registry\":true,\"raw\":\"elliptic@^6.0.0\",\"name\":\"elliptic\",\"escapedName\":\"elliptic\",\"rawSpec\":\"^6.0.0\",\"saveSpec\":null,\"fetchSpec\":\"^6.0.0\"},\"_requiredBy\":[\"/browserify-sign\",\"/create-ecdh\"],\"_resolved\":\"https://registry.npmjs.org/elliptic/-/elliptic-6.5.1.tgz\",\"_shasum\":\"c380f5f909bf1b9b4428d028cd18d3b0efd6b52b\",\"_spec\":\"elliptic@^6.0.0\",\"_where\":\"/Users/jamesmfriedman/Sites/bigsquid/react-microfe/node_modules/browserify-sign\",\"author\":{\"name\":\"Fedor Indutny\",\"email\":\"fedor@indutny.com\"},\"bugs\":{\"url\":\"https://github.com/indutny/elliptic/issues\"},\"bundleDependencies\":false,\"dependencies\":{\"bn.js\":\"^4.4.0\",\"brorand\":\"^1.0.1\",\"hash.js\":\"^1.0.0\",\"hmac-drbg\":\"^1.0.0\",\"inherits\":\"^2.0.1\",\"minimalistic-assert\":\"^1.0.0\",\"minimalistic-crypto-utils\":\"^1.0.0\"},\"deprecated\":false,\"description\":\"EC cryptography\",\"devDependencies\":{\"brfs\":\"^1.4.3\",\"coveralls\":\"^3.0.4\",\"grunt\":\"^1.0.4\",\"grunt-browserify\":\"^5.0.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-connect\":\"^1.0.0\",\"grunt-contrib-copy\":\"^1.0.0\",\"grunt-contrib-uglify\":\"^1.0.1\",\"grunt-mocha-istanbul\":\"^3.0.1\",\"grunt-saucelabs\":\"^9.0.1\",\"istanbul\":\"^0.4.2\",\"jscs\":\"^3.0.7\",\"jshint\":\"^2.6.0\",\"mocha\":\"^6.1.4\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/indutny/elliptic\",\"keywords\":[\"EC\",\"Elliptic\",\"curve\",\"Cryptography\"],\"license\":\"MIT\",\"main\":\"lib/elliptic.js\",\"name\":\"elliptic\",\"repository\":{\"type\":\"git\",\"url\":\"git+ssh://git@github.com/indutny/elliptic.git\"},\"scripts\":{\"jscs\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"jshint\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"lint\":\"npm run jscs && npm run jshint\",\"test\":\"npm run lint && npm run unit\",\"unit\":\"istanbul test _mocha --reporter=spec test/index.js\",\"version\":\"grunt dist && git add dist/\"},\"version\":\"6.5.1\"}");
+module.exports = JSON.parse("{\"_args\":[[\"elliptic@6.5.1\",\"/Users/jamesmfriedman/Sites/bigsquid/react-microfe\"]],\"_development\":true,\"_from\":\"elliptic@6.5.1\",\"_id\":\"elliptic@6.5.1\",\"_inBundle\":false,\"_integrity\":\"sha512-xvJINNLbTeWQjrl6X+7eQCrIy/YPv5XCpKW6kB5mKvtnGILoLDcySuwomfdzt0BMdLNVnuRNTuzKNHj0bva1Cg==\",\"_location\":\"/elliptic\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"elliptic@6.5.1\",\"name\":\"elliptic\",\"escapedName\":\"elliptic\",\"rawSpec\":\"6.5.1\",\"saveSpec\":null,\"fetchSpec\":\"6.5.1\"},\"_requiredBy\":[\"/browserify-sign\",\"/create-ecdh\"],\"_resolved\":\"https://registry.npmjs.org/elliptic/-/elliptic-6.5.1.tgz\",\"_spec\":\"6.5.1\",\"_where\":\"/Users/jamesmfriedman/Sites/bigsquid/react-microfe\",\"author\":{\"name\":\"Fedor Indutny\",\"email\":\"fedor@indutny.com\"},\"bugs\":{\"url\":\"https://github.com/indutny/elliptic/issues\"},\"dependencies\":{\"bn.js\":\"^4.4.0\",\"brorand\":\"^1.0.1\",\"hash.js\":\"^1.0.0\",\"hmac-drbg\":\"^1.0.0\",\"inherits\":\"^2.0.1\",\"minimalistic-assert\":\"^1.0.0\",\"minimalistic-crypto-utils\":\"^1.0.0\"},\"description\":\"EC cryptography\",\"devDependencies\":{\"brfs\":\"^1.4.3\",\"coveralls\":\"^3.0.4\",\"grunt\":\"^1.0.4\",\"grunt-browserify\":\"^5.0.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-connect\":\"^1.0.0\",\"grunt-contrib-copy\":\"^1.0.0\",\"grunt-contrib-uglify\":\"^1.0.1\",\"grunt-mocha-istanbul\":\"^3.0.1\",\"grunt-saucelabs\":\"^9.0.1\",\"istanbul\":\"^0.4.2\",\"jscs\":\"^3.0.7\",\"jshint\":\"^2.6.0\",\"mocha\":\"^6.1.4\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/indutny/elliptic\",\"keywords\":[\"EC\",\"Elliptic\",\"curve\",\"Cryptography\"],\"license\":\"MIT\",\"main\":\"lib/elliptic.js\",\"name\":\"elliptic\",\"repository\":{\"type\":\"git\",\"url\":\"git+ssh://git@github.com/indutny/elliptic.git\"},\"scripts\":{\"jscs\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"jshint\":\"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js\",\"lint\":\"npm run jscs && npm run jshint\",\"test\":\"npm run lint && npm run unit\",\"unit\":\"istanbul test _mocha --reporter=spec test/index.js\",\"version\":\"grunt dist && git add dist/\"},\"version\":\"6.5.1\"}");
 
 /***/ }),
 
@@ -30207,13 +30246,13 @@ module.exports = __webpack_require__(/*! /Users/jamesmfriedman/Sites/bigsquid/re
 /***/ }),
 
 /***/ "react":
-/*!*************************************!*\
-  !*** external "reactMicrofe.React" ***!
-  \*************************************/
+/*!**********************************************!*\
+  !*** external "reactMicrofeExternals.React" ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = reactMicrofe.React;
+module.exports = reactMicrofeExternals.React;
 
 /***/ })
 

@@ -6,7 +6,7 @@ const hash = (s: string) =>
     }, 0)
   );
 
-const getDomId = (id: string) => `script-${id}`;
+const getDomId = (id: string) => `react-microfe-${id}`;
 const getIdFromUrl = (url: string) => hash(url);
 
 const loadScript = (url: string): Promise<string> => {
@@ -69,7 +69,7 @@ const loadEnvironments = ({
   }));
 };
 
-export const importMicroFrontend = (
+export const importMicrofrontend = (
   args:
     | string
     | {
@@ -82,7 +82,7 @@ export const importMicroFrontend = (
   const {
     url,
     remoteEnv = undefined,
-    env = {},
+    env = undefined,
     global = 'reactMicrofeLoadedModule'
   } = typeof args === 'string' ? { url: args } : args;
 
@@ -97,4 +97,4 @@ export const importMicroFrontend = (
   return Promise.all(promises).then(([factory, env]) => factory(env));
 };
 
-export default importMicroFrontend;
+export default importMicrofrontend;

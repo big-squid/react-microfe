@@ -6,18 +6,46 @@ const safeParseJSON = (val: any) => {
   }
 };
 
-const _env = process.env;
+/**
+ * Get a variable in scope called `reactMicrofeEnv`
+ * Wrapped in a try / catch to prevent this from exploding
+ * If the variable is undefined
+ */
+const getMicrofeEnv = () => {
+  try {
+    // eslint-disable-next-line
+    // @ts-ignore
+    return reactMicrofeEnv || {};
+  } catch (err) {
+    return {};
+  }
+};
+
+/**
+ * Gets process.env safely
+ * Wrapped in a try / catch to prevent this from exploding
+ * If the variable is undefined
+ */
+const getProcessEnv = () => {
+  try {
+    // eslint-disable-next-line
+    // @ts-ignore
+    return process.env;
+  } catch (err) {
+    return {};
+  }
+};
 
 export const env = (
   name: string,
   defaultValue?: string | number | boolean | null
 ): string | number | boolean | null => {
-  // @ts-ignore
-  if (reactMicrofeEnv && name in reactMicrofeEnv) {
-    // @ts-ignore
-    return safeParseJSON(reactMicrofeEnv[name]);
-  } else if (name in _env) {
-    return safeParseJSON(_env[name]);
+  const mEnv = getMicrofeEnv();
+  const pEnv = getProcessEnv();
+  if (name in mEnv) {
+    return safeParseJSON(mEnv[name]);
+  } else if (name in pEnv) {
+    return safeParseJSON(pEnv[name]);
   } else if (defaultValue !== undefined) {
     return defaultValue;
   } else {

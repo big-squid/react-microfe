@@ -3,9 +3,10 @@ export const declareExternals = (externalDeclarations: {
   ReactDOM: any;
   [key: string]: any;
 }) => {
-  (window as any).reactMicrofe = (window as any).reactMicrofe || {};
+  const win = window as any;
+  win.reactMicrofeExternals = win.reactMicrofeExternals || {};
 
-  const ext = (window as any).reactMicrofe;
+  const ext = win.reactMicrofeExternals;
 
   Object.keys(externalDeclarations).forEach(key => {
     ext[key] = externalDeclarations[key];

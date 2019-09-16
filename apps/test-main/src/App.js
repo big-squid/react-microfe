@@ -2,10 +2,10 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import { importMicroFrontend } from 'react-microfe';
+import { importMicrofrontend } from 'react-microfe';
 
 const MyRemoteFrontend = React.lazy(() =>
-  importMicroFrontend({url: 'http://localhost:3001/myfrontend.js', remoteEnv: '/config.json', env: {LOCAL_VAR:'Hello World Local'}})
+  importMicrofrontend({url: 'http://localhost:3001/myfrontend.js', remoteEnv: '/config.json', env: {LOCAL_VAR:'Hello World Local'}})
 );
 
 function App() {
