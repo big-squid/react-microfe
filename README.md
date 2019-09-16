@@ -11,6 +11,8 @@ An un-opinionated implementation of microfrontends in React.
 
 Microfrontends do for the client what Microservices have done for the backend. They allow you to build, maintain, and deploy a logical portion of your application separate from other pieces. This allows teams to move quickly and independently and prevent you application from becoming a gigantic bloated monolith that is hard to work on. If you've landed here, it's either because you have heard the buzz word, or you're actually experiencing the pain in your current monolith.
 
+![Microfrontends](https://github.com/big-squid/react-microfe/raw/master/microfrontends.png "Microfrontends")
+
 ## Other solutions
 - Single SPA: This solution is more of a framework that provides ways to run multiple front end languages and uses System.js for dynamic runtime importing. If you want to make a franken app of React, Vue, and Angular, this project might be for you.
 - Web components: This involves exporting your microfrontend as a standalone web component. This solution is viable for shipping microfrontends, but browser support is still limited and requires heavy polyfilling. All of the standard limitations of web components apply. 
