@@ -1,3 +1,9 @@
+[![CircleCI](https://circleci.com/gh/big-squid/react-microfe/tree/master.svg?style=shield)](https://circleci.com/gh/big-squid/react-microfe/tree/master)
+[![codecov](https://codecov.io/gh/big-squid/react-microfe/branch/master/graph/badge.svg)](https://codecov.io/gh/big-squid/react-microfe)
+[![npm](https://img.shields.io/npm/v/react-microfe.svg)](https://www.npmjs.com/package/react-microfe)
+[![npm](https://img.shields.io/npm/dm/react-microfe.svg)](https://www.npmjs.com/package/react-microfe)
+[![npm](https://img.shields.io/npm/l/react-microfe.svg)](https://github.com/big-squid/react-microfe/blob/master/LICENSE)
+
 # React Microfrontends
 
 An un-opinionated implementation of microfrontends in React.
@@ -14,7 +20,7 @@ Microfrontends do for the client what Microservices have done for the backend. T
 ![Microfrontends](https://github.com/big-squid/react-microfe/raw/master/microfrontends.png "Microfrontends")
 
 ## Other solutions
-- Single SPA: This solution is more of a framework that provides ways to run multiple front end languages and uses System.js for dynamic runtime importing. If you want to make a franken app of React, Vue, and Angular, this project might be for you. https://github.com/CanopyTax/single-spa
+- Single SPA: This solution is more of a framework that provides ways to run multiple front end languages and uses System.js for dynamic runtime importing. If you are not working in React or need multiple front end frameworks, this project might be for you. https://github.com/CanopyTax/single-spa
 - Web components: This involves exporting your microfrontend as a standalone web component. This solution is viable for shipping microfrontends, but browser support is still limited and requires heavy polyfilling. All of the standard limitations of web components apply. 
 - Installable React components: This involves publishing your microfrontend as an installable React component. The build and maintenance portion of doing this would be nearly identical to using `react-microfe`, but the downside is that deployments will require going back to the main app shim, revving a version, installing the package, doing a build, and re-deploying the main app.
 - iFrames: This involves the main app shim loading up content from different domains using iFrames. These win for being the easiest to setup and maintain, but they're terrible for  performance, have varying security rules across browsers, and have an automatic "ick" factor associated with most devs.
