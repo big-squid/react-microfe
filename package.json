@@ -10,7 +10,7 @@
     "dev:buildremote": "cd apps/test-remote && export NODE_ENV=development && npx webpack --config microfe.config.js && cp -f dist/myfrontend.js public/myfrontend.js",
     "build": "npm run clean && tsc",
     "clean": "rm -rf lib",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "preversion": "npm test",
