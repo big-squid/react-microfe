@@ -30,9 +30,15 @@ const getProcessEnv = () => {
   try {
     // eslint-disable-next-line
     // @ts-ignore
-    return process.env;
+    return window.process.env;
   } catch (err) {
-    return {};
+    try {
+      // eslint-disable-next-line
+      // @ts-ignore
+      return process.env;
+    } catch (err) {
+      return {};
+    }
   }
 };
 
